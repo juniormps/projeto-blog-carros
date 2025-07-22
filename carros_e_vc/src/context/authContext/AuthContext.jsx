@@ -1,3 +1,5 @@
+//Contexto que fornece a informação se o usuário está autenticado ou não.
+
 import { useState, useEffect, createContext } from 'react'
 import { auth } from '../../firebase/auth'
 import { onAuthStateChanged } from 'firebase/auth'

@@ -1,3 +1,5 @@
+//Hook utilizado para a inserção de um post no db
+
 import { useState, useEffect, useRef } from "react"
 import { db } from "../firebase/firestore"
 import { collection, addDoc, Timestamp } from "firebase/firestore"

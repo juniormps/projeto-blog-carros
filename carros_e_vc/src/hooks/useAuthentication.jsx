@@ -1,3 +1,5 @@
+//Hook utilizado para criar usuário, funcionalidade de login e funcionalidade de logout.
+
 import { db } from "../firebase/firestore"
 
 import { auth } from "../firebase/auth"

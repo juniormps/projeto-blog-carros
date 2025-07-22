@@ -1,3 +1,5 @@
+//Hook de utilização do contexto de autenticação
+
 import { useContext } from "react";
 import { AuthContext } from "./AuthContext"
 

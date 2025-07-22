@@ -1,4 +1,4 @@
-//Hook utilizado para a listagem dos posts na Home, para a funcionalidade de busca e para a funcionalidade de dashboard.git 
+//Hook utilizado para a listagem dos posts na Home, para a funcionalidade de busca e para a funcionalidade de dashboard 
 
 import { useState, useEffect } from "react"
 import { db } from "../firebase/firestore"

@@ -1,3 +1,5 @@
+//Hook utilizado para fazer a edição de um post no db
+
 import { useState, useEffect, useReducer } from "react"
 import { db } from "../firebase/firestore"
 import { updateDoc, doc } from "firebase/firestore"

@@ -1,3 +1,5 @@
+//Hook utilizado para deletar um post
+
 import { useState, useEffect, useRef } from "react"
 import { db } from "../firebase/firestore"
 import { doc, deleteDoc } from "firebase/firestore"
