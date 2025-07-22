@@ -45,7 +45,7 @@ export const useUpdateDocument = (docCollection) => {
 
         try {
 
-            const docRef = await doc(db, docCollection, id)
+            const docRef = doc(db, docCollection, id)
 
             const updatedDocument = await updateDoc(docRef, data)
 
