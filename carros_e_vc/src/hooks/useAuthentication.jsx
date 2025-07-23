@@ -1,7 +1,7 @@
 //Hook utilizado para criar usuário, funcionalidade de login e funcionalidade de logout.
 
+import { useRef } from "react"
 import { db } from "../firebase/firestore"
-
 import { auth } from "../firebase/auth"
 
 import {
@@ -18,18 +18,21 @@ export const useAuthentication = () => {
     const [loading, setLoading] = useState(null)
 
     // Cleanup - deal with memory leak
-    const [cancelled, setCancelled] = useState(false)
+    const isCancelled = useRef(false)
 
-    function checkIfIsCancelled() {
-        if (cancelled) {
+    useEffect(() => {
+        return () => {
+            console.log("Hook desmontado")
+            isCancelled.current = true
+        }
+    }, [])
+
+    // Função de REGISTRO de usuário
+    const createUser = async (data) => {
+        if (isCancelled.current) {
+            console.log("Função cancelada!")
             return
         }
-    }
-
-    //Register
-    const createUser = async (data) => {
-        checkIfIsCancelled()
-
         setLoading(true)
         setError(null)
 
@@ -42,7 +45,10 @@ export const useAuthentication = () => {
 
             await updateProfile(user, { displayName: data.displayName })
 
-            setLoading(false)
+            //Checagem se o componente não foi desmontado antes de atualizar os states (se repete várias vezes ao longo do código, em cada atualização de state)
+            if (!isCancelled.current) {  
+                setLoading(false)
+            }
 
             return user
             
@@ -62,28 +68,36 @@ export const useAuthentication = () => {
                 systemErrorMessage = "Ocorreu um erro, por favor tente mais tarde."
             }
 
-            setError(systemErrorMessage)
+            if (!isCancelled.current) {
+                setError(systemErrorMessage)
+            }
 
         } finally {
-            setLoading(false)
+            if (!isCancelled.current) {
+                setLoading(false)
+            }
         }
     }
 
-    //Logout - Sign Out
+    //Função de LOGOUT - Sign Out
     const logout = () => {
-        checkIfIsCancelled()
         signOut(auth)
     }
 
-    //Login - Sign in
+    //Função de LOGIN - Sign in
     const login = async (data) => {
-        checkIfIsCancelled()
+        if (isCancelled.current) {
+            console.log("Função cancelada!")
+            return
+        }
         setLoading(true)
         setError(false)
 
         try {
             await signInWithEmailAndPassword(auth, data.email, data.password)
-            setLoading(false)
+            if (!isCancelled.current) {
+                setLoading(false)
+            }
             
         } catch (error) {
             let systemErrorMessage
@@ -96,16 +110,16 @@ export const useAuthentication = () => {
                     "Ocorreu um erro, por favor tente mais tarde"
             }
 
-            setError(systemErrorMessage)
+            if (!isCancelled.current) {
+                setError(systemErrorMessage)
+            }
 
         } finally {
-            setLoading(false)
+            if (!isCancelled.current) {
+                setLoading(false)
+            }
         }
     }
-
-    useEffect(() => {
-        return () => setCancelled(true)
-    }, [])
 
     return {
         auth,
