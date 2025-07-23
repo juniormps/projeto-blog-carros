@@ -45,6 +45,7 @@ export const useAuthentication = () => {
             setLoading(false)
 
             return user
+            
         } catch (error) {
             console.log(error.message)
             console.log(typeof error.message)
@@ -61,8 +62,10 @@ export const useAuthentication = () => {
                 systemErrorMessage = "Ocorreu um erro, por favor tente mais tarde."
             }
 
-            setLoading(false)
             setError(systemErrorMessage)
+
+        } finally {
+            setLoading(false)
         }
     }
 
@@ -94,7 +97,7 @@ export const useAuthentication = () => {
             }
 
             setError(systemErrorMessage)
-            
+
         } finally {
             setLoading(false)
         }
