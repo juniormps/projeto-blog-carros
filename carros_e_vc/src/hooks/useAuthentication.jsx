@@ -21,6 +21,8 @@ export const useAuthentication = () => {
     const isCancelled = useRef(false)
 
     useEffect(() => {
+        isCancelled.current = false   //reseta a flag toda vez que o componente é montado
+
         return () => {
             console.log("Hook desmontado")
             isCancelled.current = true
