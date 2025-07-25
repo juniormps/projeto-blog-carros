@@ -7,7 +7,6 @@ import { doc, deleteDoc } from "firebase/firestore"
 
 export const useDeleteDocument = (docCollection) => {
     
-    const [error, setError] = useState(null)
     const [loading, setLoading] = useState(null)
 
     // deal with memory leak
@@ -30,7 +29,6 @@ export const useDeleteDocument = (docCollection) => {
         }
 
         setLoading(true)
-        setError(null)
     
         try {
             await deleteDoc(doc(db, docCollection, id))
@@ -38,9 +36,7 @@ export const useDeleteDocument = (docCollection) => {
 
         } catch (error) {
             console.log("Erro ao deletar:", error.message)
-            if (!isCancelled.current) {
-                setError(error.message)
-            }
+            throw new Error(error.message)
 
         } finally {
             if (!isCancelled.current) {
@@ -50,5 +46,5 @@ export const useDeleteDocument = (docCollection) => {
 
     }
 
-    return { deleteDocument, loading, error }
+    return { deleteDocument, loading }
 }

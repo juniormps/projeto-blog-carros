@@ -1,6 +1,6 @@
 import styles from './Dashboard.module.css'
 import { Link } from 'react-router-dom'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 
 //Hooks
 import { useAuthContext } from "../../context/authContext/useAuthContext"
@@ -14,17 +14,28 @@ const Dashboard = () => {
     const uid = user.uid
 
     const { documents: posts, loading } = useFetchDocuments("posts", null, uid)
-
     const { deleteDocument } = useDeleteDocument("posts")
+
+    const [deletedId, setDeletedId] = useState(null)  //estado para setar um post como deletado e deixar de exibi-lo no dashboard
 
     useEffect(() => {
         console.log("Dashboard montado")
     }, [])
-    
 
+    const handleDelete = async (id) => {
+        try {
+            await deleteDocument(id)
+            setDeletedId(id)   
+        } catch (error) {
+            alert("Erro ao excluir o post: " + error.message)
+        }
+    }
+    
     if (loading) {
         return <p>Carregando...</p>
     }
+
+    const visiblePosts = posts?.filter(post => post.id !== deletedId)
 
   return (
 
@@ -33,10 +44,9 @@ const Dashboard = () => {
 
         <p>Gerencie os seus posts</p>
 
-        {posts && posts.length === 0 ? (
+        {visiblePosts && visiblePosts.length === 0 ? (
             <div className={styles.noposts}>
                 <p>Não foram encontrados posts</p>
-
                 <Link to="/posts/create" className="btn">Criar primeiro post</Link>
             </div>
             ) : (
@@ -46,7 +56,7 @@ const Dashboard = () => {
             </div>
         )}
 
-        {posts && posts.map((post) => (
+        {visiblePosts && visiblePosts.map((post) => (
             <div className={styles.post_row} key={post.id}>
 
                 <p>{post.title}</p>
@@ -57,7 +67,7 @@ const Dashboard = () => {
 
                     <Link to={`/posts/edit/${post.id}`} className="btn btn-outline">Editar</Link>
 
-                    <button onClick={() => {console.log("Tentando excluir post:", post.id); deleteDocument(post.id)}} className="btn btn-outline btn-danger">
+                    <button onClick={() => handleDelete(post.id)} className="btn btn-outline btn-danger">
                         Excluir
                     </button>
                 </div>
