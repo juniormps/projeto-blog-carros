@@ -1,6 +1,6 @@
 //Hook utilizado para a listagem dos posts na Home, para a funcionalidade de busca e para a funcionalidade de dashboard 
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { db } from "../firebase/firestore"
 import { collection, query, orderBy, onSnapshot, where } from "firebase/firestore"
 
@@ -11,14 +11,26 @@ export const useFetchDocuments = (docCollection, search = null, uid = null) => {
     const [error, setError] = useState(null)
     const [loading, setLoading] = useState(null)
 
-    // deal with memory leak
-    const [cancelled, setCancelled] = useState(false)
+    // Cleanup - deal with memory leak
+    const isCancelled = useRef(false)
+
+    useEffect(() => {
+        isCancelled.current = false   //reseta a flag toda vez que o componente é montado
+
+        return () => {
+            console.log("Hook desmontado")
+            isCancelled.current = true
+        }
+    }, [])
 
 
     useEffect(() => {
 
         const loadData = async () => {
-            if (cancelled) return
+            if (isCancelled.current) {
+                console.log("Função cancelada!")
+                return
+            }
 
             setLoading(true)
 
@@ -61,31 +73,22 @@ export const useFetchDocuments = (docCollection, search = null, uid = null) => {
                 })
 
             } catch (error) {
-
                 console.log(error)
-                setError(error.message)  
+                if (!isCancelled.current) {
+                    setError(error.message)
+                }
                 
             } finally {
-                setLoading(false)
-
+                if (!isCancelled.current) {  
+                    setLoading(false)
+                }
             }
-
         }
 
         loadData()
 
-    }, [docCollection, search, uid, cancelled])
-
-
-    useEffect(() => {
-
-        return () => setCancelled(true)
-
-    }, [])
+    }, [docCollection, search, uid])
 
 
     return { documents, loading, error }
-
-
-
 }
