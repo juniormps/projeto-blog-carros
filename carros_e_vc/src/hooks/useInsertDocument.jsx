@@ -14,34 +14,39 @@ export const useInsertDocument = (docCollection) => {
     const isCancelled = useRef(false)
 
     useEffect(() => {
+        isCancelled.current = false   //reseta a flag toda vez que o componente é montado
+
         return () => {
+            console.log("Hook desmontado")
             isCancelled.current = true
         }
     }, [])
     
 
     const insertDocument = async (document) => {
+        if (isCancelled.current) {
+            console.log("Função cancelada!")
+            return
+        }
         setLoading(true)
         setError(null)
 
         try {
-
             const newDocument = { ...document, createdAt: Timestamp.now() }
 
             await addDoc (collection (db, docCollection), newDocument)
 
-            if (!isCancelled.current) {
-                setLoading(false)
-            }
-
         } catch (error) {
-
             if (!isCancelled.current) {
                 setError(error.message)
+            }
+
+        } finally {
+            if (!isCancelled.current) {
                 setLoading(false)
             }
-            
         }
+
     }
 
     return { insertDocument, loading, error }

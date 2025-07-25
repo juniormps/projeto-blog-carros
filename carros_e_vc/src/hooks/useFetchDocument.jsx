@@ -1,6 +1,6 @@
 //Hook utilizado para buscar e fornecer um post em específico para a página Post (que mostra cada post individualmente)
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { db } from "../firebase/firestore"
 import { doc, getDoc } from "firebase/firestore"
 
@@ -11,29 +11,47 @@ export const useFetchDocument = (docCollection, id) => {
     const [error, setError] = useState(null)
     const [loading, setLoading] = useState(null)
 
-    // deal with memory leak
-    const [cancelled, setCancelled] = useState(false)
+    // Cleanup - deal with memory leak
+    const isCancelled = useRef(false)
 
+    useEffect(() => {
+        isCancelled.current = false   //reseta a flag toda vez que o componente é montado
+
+        return () => {
+            console.log("Hook desmontado")
+            isCancelled.current = true
+        }
+    }, [])
 
     useEffect(() => {
 
         const loadDocument = async () => {
-            if (cancelled) return
+            if (isCancelled.current) {
+                console.log("Função cancelada!")
+                return
+            }
 
             setLoading(true)
+            setError(null)
 
             try {
                 const docRef = doc(db, docCollection, id)
                 const docSnap = await getDoc(docRef)
 
-                setDocument(docSnap.data())
+                if (!isCancelled.current) {  
+                    setDocument(docSnap.data())
+                }
 
             } catch (error) {
                 console.log(error)
-                setError(error.message)
-           
+                if (!isCancelled.current) {  
+                    setError(error.message)
+                }
+    
             } finally {
-                setLoading(false)
+                if (!isCancelled.current) {  
+                    setLoading(false)
+                }
             }
 
         }
@@ -42,14 +60,5 @@ export const useFetchDocument = (docCollection, id) => {
 
     }, [docCollection, id])
 
-
-    useEffect(() => {
-
-        return () => setCancelled(true)
-
-    }, [])
-
-
     return { document, loading, error }
-
 }

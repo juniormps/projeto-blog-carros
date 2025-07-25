@@ -1,6 +1,6 @@
 //Hook utilizado para fazer a edição de um post no db
 
-import { useState, useEffect, useReducer } from "react"
+import { useState, useEffect, useReducer, useRef } from "react"
 import { db } from "../firebase/firestore"
 import { updateDoc, doc } from "firebase/firestore"
 
@@ -32,10 +32,10 @@ export const useUpdateDocument = (docCollection) => {
     const [response, dispatch] = useReducer(updateReducer, initialState)
 
     // deal with memory leak
-    const [cancelled, setCancelled] = useState(false)
+    const isCancelled = useRef(false)
 
     const checkCancelBeforeDispatch = (action) => {
-        if (!cancelled) {
+        if (!isCancelled.current) {
             dispatch(action)
         }
     }
@@ -62,10 +62,6 @@ export const useUpdateDocument = (docCollection) => {
             })
         }
     }
-
-    useEffect(() => {
-        return () => setCancelled(true)
-    }, [])
 
     return { updateDocument, response }
 }
